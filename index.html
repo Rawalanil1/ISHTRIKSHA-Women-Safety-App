@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeGuard - Women Safety App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+</head>
+<body>
+    <!-- Language Selector & Theme Toggle -->
+    <div class="top-bar">
+        <select id="languageSelector" class="language-select">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
+        </select>
+        <button id="themeToggle" class="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <!-- Emergency Contacts Bar -->
+    <div class="emergency-bar">
+        <div class="emergency-contacts">
+            <button class="emergency-contact" data-number="103">
+                <i class="fas fa-shield-alt"></i>
+                <span data-translate="police">Police</span>
+            </button>
+            <button class="emergency-contact" data-number="112">
+                <i class="fas fa-ambulance"></i>
+                <span data-translate="emergency">Emergency</span>
+            </button>
+            <button class="emergency-contact" data-number="1091">
+                <i class="fas fa-phone"></i>
+                <span data-translate="helpline">Helpline</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <div class="status-indicator">
+                <div class="status-dot safe"></div>
+                <span id="safetyStatus" data-translate="safe">Safe</span>
+                <div class="emergency-timer" id="emergencyTimer" style="display: none;">
+                    <i class="fas fa-clock"></i>
+                    <span id="timerDisplay">00:00</span>
+                </div>
+            </div>
+
+            <div class="location-display">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="location-info">
+                    <div id="currentLocation" data-translate="locating">Locating...</div>
+                    <div id="coordinates" class="coordinates"></div>
+                    <div id="locationStatus" class="location-status">
+                        <span class="location-accuracy" id="locationAccuracy"></span>
+                    </div>
+                </div>
+                <button id="refreshLocation" class="btn btn--sm btn--outline">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+
+            <!-- Main SOS Button -->
+            <div class="sos-container">
+                <button id="sosButton" class="sos-button">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span data-translate="sos">SOS</span>
+                </button>
+                <div class="sos-instructions">
+                    <p data-translate="sos-instructions">Tap to activate emergency protocol</p>
+                </div>
+            </div>
+
+            <!-- Quick Access Buttons -->
+            <div class="quick-actions">
+                <button class="quick-action fake-call">
+                    <i class="fas fa-phone"></i>
+                    <span data-translate="fake-call">Fake Call</span>
+                </button>
+                <button class="quick-action police-alert">
+                    <i class="fas fa-shield-alt"></i>
+                    <span data-translate="police-alert">Police Alert</span>
+                </button>
+                <button class="quick-action medical-emergency">
+                    <i class="fas fa-heartbeat"></i>
+                    <span data-translate="medical">Medical</span>
+                </button>
+                <button class="quick-action share-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span data-translate="share-location">Share Location</span>
+                </button>
+            </div>
+
+            <!-- Safety Features Status -->
+            <div class="safety-features">
+                <div class="feature-status" id="voiceStatus">
+                    <i class="fas fa-microphone"></i>
+                    <span data-translate="voice-listening">Voice: Listening</span>
+                </div>
+                <div class="feature-status" id="shakeStatus">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span data-translate="shake-detection">Shake: Active</span>
+                </div>
+                <div class="feature-status" id="powerStatus">
+                    <i class="fas fa-power-off"></i>
+                    <span data-translate="power-detection">Power: Ready</span>
+                </div>
+            </div>
+
+            <!-- Safety Tips Carousel -->
+            <div class="tips-carousel">
+                <h3 data-translate="safety-tips">Safety Tips</h3>
+                <div class="tip-card">
+                    <p id="currentTip"></p>
+                </div>
+                <div class="tip-navigation">
+                    <button id="prevTip"><i class="fas fa-chevron-left"></i></button>
+                    <span id="tipCounter">1/5</span>
+                    <button id="nextTip"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Screen -->
+        <div id="mapScreen" class="screen">
+            <div class="screen-header">
+                <h2 data-translate="safe-zones-map">Safe Zones Map</h2>
+                <div class="map-controls">
+                    <button id="centerMapBtn" class="btn btn--sm btn--outline">
+                        <i class="fas fa-crosshairs"></i>
+                        <span data-translate="center-map">Center</span>
+                    </button>
+                    <button id="routeToNearestBtn" class="btn btn--sm btn--primary">
+                        <i class="fas fa-route"></i>
+                        <span data-translate="nearest-safe">Nearest</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="liveMap" style="height: 400px; width: 100%; border-radius: var(--radius-lg);"></div>
+            </div>
+
+            <div class="zone-legend">
+                <div class="legend-item">
+                    <div class="legend-color police"></div>
+                    <span data-translate="police-stations">Police Stations</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color hospital"></div>
+                    <span data-translate="hospitals">Hospitals</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color shelter"></div>
+                    <span data-translate="shelters">Shelters</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color safe"></div>
+                    <span data-translate="safe-zones">Safe Zones</span>
+                </div>
+            </div>
+
+            <div class="nearest-zones" id="nearestZones">
+                <h3 data-translate="nearest-locations">Nearest Safe Locations</h3>
+                <div id="nearestList" class="nearest-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Screen -->
+        <div id="communityScreen" class="screen">
+            <div class="screen-header">
+                <h2 data-translate="community-safety">Community & Volunteers</h2>
+                <button id="reportUnsafeBtn" class="btn btn--outline btn--sm">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span data-translate="report-unsafe">Report Unsafe</span>
+                </button>
+            </div>
+
+            <div class="community-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="activeVolunteers">25</div>
+                    <div class="stat-label" data-translate="active-volunteers">Active Volunteers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="safeZoneCount">12</div>
+                    <div class="stat-label" data-translate="safe-zones">Safe Zones</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="emergencyResponse">3</div>
+                    <div class="stat-label" data-translate="avg-response">Min Avg Response</div>
+                </div>
+            </div>
+
+            <div class="community-volunteers">
+                <h3 data-translate="nearby-volunteers">Nearby Volunteers</h3>
+                <div class="volunteer-list" id="volunteerList">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="community-alerts">
+                <h3 data-translate="recent-alerts">Recent Community Alerts</h3>
+                <div class="alert-list" id="communityAlerts">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen">
+            <div class="screen-header">
+                <h2 data-translate="settings">Settings</h2>
+            </div>
+
+            <!-- Emergency Contacts Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <h3 data-translate="emergency-contacts">Emergency Contacts</h3>
+                    <span class="contact-count" id="contactCount">0 contacts</span>
+                </div>
+                <div id="contactsList" class="contacts-list">
+                    <!-- Dynamic contacts will be populated here -->
+                </div>
+                <button id="addContactBtn" class="btn btn--outline btn--full-width">
+                    <i class="fas fa-plus"></i>
+                    <span data-translate="add-contact">Add Contact</span>
+                </button>
+            </div>
+
+            <!-- Message Customization -->
+            <div class="settings-section">
+                <h3 data-translate="emergency-message">Emergency Message</h3>
+                <textarea id="emergencyMessage" class="form-control" rows="3" 
+                          placeholder="Customize your emergency message..."></textarea>
+                <div class="message-variables">
+                    <small data-translate="message-help">Use {location}, {time}, {coordinates} for automatic values</small>
+                </div>
+                <button id="saveMessageBtn" class="btn btn--primary btn--sm">
+                    <span data-translate="save-message">Save Message</span>
+                </button>
+            </div>
+
+            <!-- Safety Features -->
+            <div class="settings-section">
+                <h3 data-translate="safety-features">Safety Features</h3>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-microphone"></i>
+                        <span data-translate="voice-commands">Voice Commands</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="voiceToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span data-translate="shake-detection">Shake Detection</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="shakeToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-power-off"></i>
+                        <span data-translate="power-button">Power Button (3x)</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="powerButtonToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Location & Privacy -->
+            <div class="settings-section">
+                <h3 data-translate="location-privacy">Location & Privacy</h3>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span data-translate="location-tracking">High-Accuracy GPS</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="locationToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fas fa-share-alt"></i>
+                        <span data-translate="auto-share">Auto Share Location</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoShareToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="settings-section">
+                <h3 data-translate="system-info">System Information</h3>
+                <div class="system-info">
+                    <div class="info-item">
+                        <span data-translate="app-version">App Version:</span>
+                        <span>2.1.0</span>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="battery-level">Battery Level:</span>
+                        <span id="batteryLevel">85%</span>
+                    </div>
+                    <div class="info-item">
+                        <span data-translate="gps-accuracy">GPS Accuracy:</span>
+                        <span id="gpsAccuracy">±5m</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-screen="homeScreen">
+            <i class="fas fa-home"></i>
+            <span data-translate="home">Home</span>
+        </button>
+        <button class="nav-item" data-screen="mapScreen">
+            <i class="fas fa-map"></i>
+            <span data-translate="map">Map</span>
+        </button>
+        <button class="nav-item" data-screen="communityScreen">
+            <i class="fas fa-users"></i>
+            <span data-translate="community">Community</span>
+        </button>
+        <button class="nav-item" data-screen="settingsScreen">
+            <i class="fas fa-cog"></i>
+            <span data-translate="settings">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Modals -->
+
+    <!-- SOS Countdown Modal -->
+    <div id="sosModal" class="modal hidden">
+        <div class="modal-content sos-modal">
+            <div class="sos-countdown">
+                <div class="countdown-circle">
+                    <div class="countdown-number" id="countdownNumber">3</div>
+                </div>
+                <h3 data-translate="emergency-alert">Emergency Alert Activating</h3>
+                <p data-translate="countdown-message">Alert will be sent in</p>
+                <div class="sos-actions">
+                    <button id="cancelSOS" class="btn btn--outline btn--lg">
+                        <span data-translate="cancel">Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Active Modal -->
+    <div id="emergencyModal" class="modal hidden">
+        <div class="modal-content emergency-active">
+            <div class="emergency-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2 data-translate="emergency-active">Emergency Active</h2>
+                <div class="emergency-timer-display">
+                    <span id="emergencyTimerModal">00:00</span>
+                </div>
+            </div>
+            <div class="emergency-info">
+                <div class="alert-status">
+                    <i class="fas fa-check-circle"></i>
+                    <span data-translate="alerts-sent">Emergency contacts notified</span>
+                </div>
+                <div class="location-status">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span data-translate="location-shared">Live location being shared</span>
+                </div>
+                <div class="recording-status">
+                    <i class="fas fa-video recording"></i>
+                    <span data-translate="recording-active">Emergency recording active</span>
+                </div>
+            </div>
+            <div class="emergency-actions">
+                <button id="callPoliceBtn" class="btn btn--primary btn--lg">
+                    <i class="fas fa-phone"></i>
+                    <span data-translate="call-police">Call Police (103)</span>
+                </button>
+                <button id="markSafeBtn" class="btn btn--secondary btn--lg">
+                    <i class="fas fa-check"></i>
+                    <span data-translate="mark-safe">Mark as Safe</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div id="addContactModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-translate="add-emergency-contact">Add Emergency Contact</h3>
+                <button class="modal-close" data-modal="addContactModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addContactForm">
+                <div class="form-group">
+                    <label class="form-label" data-translate="contact-name">Contact Name</label>
+                    <input type="text" id="contactName" class="form-control" required>
+                    <div class="form-error" id="nameError"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-translate="phone-number">Phone Number</label>
+                    <input type="tel" id="contactPhone" class="form-control" required>
+                    <div class="form-error" id="phoneError"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-translate="relationship">Relationship</label>
+                    <select id="contactRelation" class="form-control">
+                        <option value="family">Family</option>
+                        <option value="friend">Friend</option>
+                        <option value="colleague">Colleague</option>
+                        <option value="neighbor">Neighbor</option>
+                        <option value="police">Police</option>
+                        <option value="medical">Medical</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--outline" data-modal="addContactModal">
+                        <span data-translate="cancel">Cancel</span>
+                    </button>
+                    <button type="submit" class="btn btn--primary">
+                        <span data-translate="add-contact">Add Contact</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Contact Modal -->
+    <div id="editContactModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-translate="edit-contact">Edit Contact</h3>
+                <button class="modal-close" data-modal="editContactModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editContactForm">
+                <div class="form-group">
+                    <label class="form-label" data-translate="contact-name">Contact Name</label>
+                    <input type="text" id="editContactName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-translate="phone-number">Phone Number</label>
+                    <input type="tel" id="editContactPhone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-translate="relationship">Relationship</label>
+                    <select id="editContactRelation" class="form-control">
+                        <option value="family">Family</option>
+                        <option value="friend">Friend</option>
+                        <option value="colleague">Colleague</option>
+                        <option value="neighbor">Neighbor</option>
+                        <option value="police">Police</option>
+                        <option value="medical">Medical</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--outline" data-modal="editContactModal">
+                        <span data-translate="cancel">Cancel</span>
+                    </button>
+                    <button type="submit" class="btn btn--primary">
+                        <span data-translate="save-changes">Save Changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fake Call Modal -->
+    <div id="fakeCallModal" class="modal hidden">
+        <div class="modal-content fake-call">
+            <div class="call-header">
+                <div class="call-info">
+                    <div class="caller-name">Mom</div>
+                    <div class="call-status" data-translate="incoming-call">Incoming call...</div>
+                    <div class="call-duration">00:00</div>
+                </div>
+                <div class="call-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+            <div class="call-actions">
+                <button id="declineFakeCall" class="call-button decline">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+                <button id="acceptFakeCall" class="call-button accept">
+                    <i class="fas fa-phone"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Command Indicator -->
+    <div class="voice-indicator" id="voiceIndicator">
+        <i class="fas fa-microphone"></i>
+        <span data-translate="listening">Listening for "Help Me"...</span>
+        <div class="voice-animation"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loadingText" data-translate="loading">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="app.js"></script>
+</body>
+</html>
