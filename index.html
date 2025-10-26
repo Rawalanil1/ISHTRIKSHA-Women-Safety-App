@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISHTRIKSHA - Your Digital Shield for Safety</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="ISHTRIKSHA - Advanced women's safety app with SOS, location tracking, and emergency features">
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading ISHTRIKSHA...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header with Logo -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" fill="currentColor" stroke="currentColor" stroke-width="2"/>
+                        <path d="M20 8C16 8 13 11 13 15C13 19 16 22 20 26C24 22 27 19 27 15C27 11 24 8 20 8Z" fill="white"/>
+                        <path d="M12 28L28 28C28 30 26 32 20 32C14 32 12 30 12 28Z" fill="white"/>
+                        <circle cx="20" cy="15" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>ISHTRIKSHA</h1>
+                    <p>Your Digital Shield for Safety</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" class="btn--secondary btn--sm">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button id="profileToggle" class="btn--secondary btn--sm">👤</button>
+            </div>
+        </header>
+
+        <!-- Sign-in Screen -->
+        <div id="signInScreen" class="screen active">
+            <div class="sign-in-container">
+                <div class="welcome-content">
+                    <div class="hero-logo">
+                        <svg width="80" height="80" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="18" fill="currentColor" stroke="currentColor" stroke-width="2"/>
+                            <path d="M20 8C16 8 13 11 13 15C13 19 16 22 20 26C24 22 27 19 27 15C27 11 24 8 20 8Z" fill="white"/>
+                            <path d="M12 28L28 28C28 30 26 32 20 32C14 32 12 30 12 28Z" fill="white"/>
+                            <circle cx="20" cy="15" r="3" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h2>Welcome to ISHTRIKSHA</h2>
+                    <p>Your trusted companion for personal safety and emergency response</p>
+                </div>
+                <div class="sign-in-actions">
+                    <button id="googleSignIn" class="btn--primary btn--full-width btn--lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Sign in with Google
+                    </button>
+                    <p class="sign-in-disclaimer">By signing in, you agree to our Terms of Service and Privacy Policy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Setup Screen -->
+        <div id="profileScreen" class="screen">
+            <div class="profile-container">
+                <div class="form-header">
+                    <h2>Complete Your Profile</h2>
+                    <p>Help us protect you better by providing your details</p>
+                </div>
+                <form id="profileForm" class="profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName" class="form-label">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" class="form-control" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-control" required placeholder="Enter your email">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" pattern="[0-9]{10}" required placeholder="Enter 10-digit phone number">
+                        </div>
+                        <div class="form-group">
+                            <label for="dob" class="form-label">Date of Birth *</label>
+                            <input type="date" id="dob" name="dob" class="form-control" required max="2010-01-01">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address" class="form-label">Address *</label>
+                        <textarea id="address" name="address" class="form-control" rows="3" required placeholder="Enter your complete address"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pincode" class="form-label">Pincode *</label>
+                            <input type="text" id="pincode" name="pincode" class="form-control" pattern="[0-9]{6}" required placeholder="Enter 6-digit pincode">
+                        </div>
+                        <div class="form-group">
+                            <label for="emergencyContact" class="form-label">Emergency Contact</label>
+                            <input type="tel" id="emergencyContact" name="emergencyContact" class="form-control" pattern="[0-9]{10}" placeholder="Enter emergency contact number">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn--primary btn--full-width btn--lg">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Permissions Screen -->
+        <div id="permissionsScreen" class="screen">
+            <div class="permissions-container">
+                <div class="permissions-header">
+                    <h2>Grant Permissions</h2>
+                    <p>ISHTRIKSHA needs these permissions to protect you effectively</p>
+                </div>
+                <div class="permissions-list">
+                    <div class="permission-item">
+                        <div class="permission-icon">📍</div>
+                        <div class="permission-content">
+                            <h3>Location Access</h3>
+                            <p>Required to track your location and share with emergency contacts</p>
+                            <span class="status--error">Required</span>
+                        </div>
+                        <button id="locationPermission" class="btn--primary">Grant</button>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-icon">🎤</div>
+                        <div class="permission-content">
+                            <h3>Microphone Access</h3>
+                            <p>Required to record audio during SOS activation for evidence</p>
+                            <span class="status--error">Required</span>
+                        </div>
+                        <button id="microphonePermission" class="btn--primary">Grant</button>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-icon">📞</div>
+                        <div class="permission-content">
+                            <h3>Contacts Access</h3>
+                            <p>Optional: To select emergency contacts from your phone</p>
+                            <span class="status--info">Optional</span>
+                        </div>
+                        <button id="contactsPermission" class="btn--secondary">Grant</button>
+                    </div>
+                </div>
+                <div class="permissions-actions">
+                    <button id="continueToApp" class="btn--primary btn--full-width btn--lg">Continue to App</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboardScreen" class="screen">
+            <!-- Tab Navigation -->
+            <nav class="tab-navigation">
+                <button class="tab-btn active" data-tab="home">Home</button>
+                <button class="tab-btn" data-tab="sos">SOS</button>
+                <button class="tab-btn" data-tab="map">Map</button>
+                <button class="tab-btn" data-tab="contacts">Contacts</button>
+                <button class="tab-btn" data-tab="profile">Profile</button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Home Tab -->
+                <div id="homeTab" class="tab-panel active">
+                    <div class="dashboard-header">
+                        <h2>Safety Dashboard</h2>
+                        <div class="status-indicators">
+                            <div class="status-item">
+                                <span class="status--success">Location: Active</span>
+                            </div>
+                            <div class="status-item">
+                                <span id="safetyStatus" class="status--success">Status: Safe</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button id="quickSOS" class="sos-button">
+                            <span class="sos-icon">🚨</span>
+                            <span class="sos-text">EMERGENCY SOS</span>
+                            <span class="sos-subtitle">Hold for 3 seconds</span>
+                        </button>
+                        
+                        <div class="emergency-numbers">
+                            <h3>Emergency Numbers</h3>
+                            <div class="emergency-grid">
+                                <button class="emergency-btn" data-number="100">
+                                    <span>🚔</span>
+                                    <span>Police</span>
+                                    <span>100</span>
+                                </button>
+                                <button class="emergency-btn" data-number="103">
+                                    <span>👩‍⚕️</span>
+                                    <span>Women Helpline</span>
+                                    <span>103</span>
+                                </button>
+                                <button class="emergency-btn" data-number="112">
+                                    <span>🆘</span>
+                                    <span>Emergency</span>
+                                    <span>112</span>
+                                </button>
+                                <button class="emergency-btn" data-number="108">
+                                    <span>🏥</span>
+                                    <span>Ambulance</span>
+                                    <span>108</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOS Tab -->
+                <div id="sosTab" class="tab-panel">
+                    <div class="sos-container">
+                        <h2>Emergency SOS</h2>
+                        <div class="sos-main">
+                            <div class="sos-button-container">
+                                <button id="mainSOSButton" class="main-sos-button">
+                                    <div class="sos-ripple"></div>
+                                    <span class="sos-icon">🚨</span>
+                                    <span class="sos-text">SOS</span>
+                                </button>
+                                <div id="sosCountdown" class="sos-countdown hidden">
+                                    <span id="countdownTimer">3</span>
+                                </div>
+                            </div>
+                            <p class="sos-instructions">Hold the SOS button for 3 seconds to activate emergency mode</p>
+                            
+                            <div class="sos-features">
+                                <div class="feature-item">
+                                    <span class="feature-icon">📍</span>
+                                    <span>Shares location with emergency contacts</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">🎤</span>
+                                    <span>Records audio automatically</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">📱</span>
+                                    <span>Sends SMS to emergency contacts</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Tab -->
+                <div id="mapTab" class="tab-panel">
+                    <div class="map-container">
+                        <div class="map-header">
+                            <h2>Live Location</h2>
+                            <div class="map-actions">
+                                <button id="shareLocation" class="btn--secondary btn--sm">Share Location</button>
+                                <button id="centerMap" class="btn--secondary btn--sm">📍 Center</button>
+                            </div>
+                        </div>
+                        <div id="map" class="map-widget"></div>
+                        <div class="location-info">
+                            <div class="info-item">
+                                <strong>Current Location:</strong>
+                                <span id="currentLocation">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>Last Updated:</strong>
+                                <span id="lastUpdated">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacts Tab -->
+                <div id="contactsTab" class="tab-panel">
+                    <div class="contacts-container">
+                        <div class="contacts-header">
+                            <h2>Emergency Contacts</h2>
+                            <button id="addContact" class="btn--primary btn--sm">+ Add Contact</button>
+                        </div>
+                        <div id="contactsList" class="contacts-list">
+                            <!-- Emergency contacts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profileTab" class="tab-panel">
+                    <div class="profile-view">
+                        <div class="profile-header">
+                            <h2>My Profile</h2>
+                            <button id="editProfile" class="btn--secondary btn--sm">Edit</button>
+                        </div>
+                        <div id="profileDisplay" class="profile-display">
+                            <!-- Profile information will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- SOS Active Modal -->
+    <div id="sosActiveModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="sos-active-content">
+                <div class="sos-animation">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
+                    <span class="sos-icon">🚨</span>
+                </div>
+                <h2>SOS ACTIVATED</h2>
+                <p>Emergency services have been notified</p>
+                <div class="sos-actions">
+                    <button id="cancelSOS" class="btn--secondary">Cancel</button>
+                    <button id="confirmSOS" class="btn--primary">Confirm Emergency</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div id="addContactModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Emergency Contact</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="addContactForm">
+                <div class="form-group">
+                    <label for="contactName" class="form-label">Name</label>
+                    <input type="text" id="contactName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactPhone" class="form-label">Phone Number</label>
+                    <input type="tel" id="contactPhone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactRelation" class="form-label">Relationship</label>
+                    <select id="contactRelation" class="form-control" required>
+                        <option value="">Select relationship</option>
+                        <option value="family">Family</option>
+                        <option value="friend">Friend</option>
+                        <option value="colleague">Colleague</option>
+                        <option value="neighbor">Neighbor</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn--secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn--primary">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
